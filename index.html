@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUBICON 2026 | RMHS MNL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-950 text-white font-sans min-h-screen">
+
+    <header class="py-10 px-6 text-center border-b border-white/10">
+        <h1 class="text-5xl font-black tracking-tighter">RUBICON <span class="text-blue-500">2026</span></h1>
+        <p class="text-gray-400 text-sm uppercase tracking-[0.3em] mt-2">RMHS Manila • Speedcubing</p>
+    </header>
+
+    <main class="max-w-xl mx-auto py-8 px-4">
+        
+        <div class="bg-white/5 p-6 rounded-3xl border border-white/10 mb-8">
+            <h2 class="text-lg font-bold mb-4 text-blue-400">Add New Record</h2>
+            <div class="grid grid-cols-1 gap-3">
+                <input id="userName" type="text" placeholder="Ramonian Name" class="bg-black/40 border border-white/10 rounded-xl p-4 focus:border-blue-500 outline-none">
+                <input id="userTime" type="number" step="0.01" placeholder="Time (seconds)" class="bg-black/40 border border-white/10 rounded-xl p-4 focus:border-blue-500 outline-none">
+                <button onclick="addTime()" class="bg-blue-600 font-black py-4 rounded-xl hover:bg-blue-500 transition uppercase tracking-widest text-xs">Update Board</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl overflow-hidden">
+            <div class="bg-blue-600 px-6 py-3 flex justify-between">
+                <span class="text-[10px] font-black uppercase tracking-widest">3x3 Rankings</span>
+                <button onclick="clearBoard()" class="text-[10px] font-black uppercase tracking-widest opacity-50 hover:opacity-100">Reset</button>
+            </div>
+            <table class="w-full text-left">
+                <tbody id="leaderboardBody" class="divide-y divide-gray-100 text-gray-900">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Load data from phone memory on start
+        let scores = JSON.parse(localStorage.getItem('rubicon_scores')) || [];
+        updateTable();
+
+        function addTime() {
+            const name = document.getElementById('userName').value;
+            const time = parseFloat(document.getElementById('userTime').value);
+
+            if (name && !isNaN(time)) {
+                scores.push({ name, time });
+                scores.sort((a, b) => a.time - b.time); // Fastest first
+                
+                // Save to phone memory
+                localStorage.setItem('rubicon_scores', JSON.stringify(scores));
+                
+                updateTable();
+                document.getElementById('userName').value = '';
+                document.getElementById('userTime').value = '';
+            }
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('leaderboardBody');
+            if (scores.length === 0) {
+                tbody.innerHTML = `<tr><td class="px-6 py-10 text-center text-gray-400">No times yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = scores.map((s, i) => `
+                <tr class="hover:bg-blue-50 transition">
+                    <td class="px-6 py-4 font-bold"><span class="text-blue-600 mr-2">#${i+1}</span> ${s.name}</td>
+                    <td class="px-6 py-4 text-right font-mono font-black text-blue-700">${s.time.toFixed(2)}s</td>
+                </tr>
+            `).join('');
+        }
+
+        function clearBoard() {
+            if(confirm("Clear all times?")) {
+                scores = [];
+                localStorage.removeItem('rubicon_scores');
+                updateTable();
+            }
+        }
+    </script>
+
+    <footer class="text-center py-10 text-gray-600 text-[10px] uppercase tracking-widest font-bold">
+        Not Official RMHS MNL
+    </footer>
+</body>
+</html>
